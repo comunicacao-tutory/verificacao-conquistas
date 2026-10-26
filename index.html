@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#07070C">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0040C8">
 <title>Verificação de Conquistas · Tutory</title>
 <meta name="description" content="Confirme a autenticidade de um certificado emitido pelo Programa de Reconhecimento Tutory Mentoria.">
 <meta name="robots" content="noindex">
@@ -19,253 +19,282 @@
 
 <style>
   :root{
-    --preto:#07070C; --carvao:#0E0E15; --carvao-2:#14141D;
-    --ouro:#D5AB69; --champanhe:#F2E0B6; --bronze:#B98B3E;
-    --texto:#E6E3DC; --mudo:#9A978F; --apagado:#848179;
-    --borda:#23232E; --borda-forte:#33333F;
-    --ok:#6FD39B; --erro:#FF9A8A;
+    /* tirados do site: tutory.com.br/produtos/mentoria */
+    --azul:#0040C8; --azul-fundo:#0A2A8C; --azul-claro:#5B8DEF; --azul-ceu:#38BDF8;
+    --azul-leve:#EDF2FF; --azul-borda:#D6E2FF;
+    --fundo:#F9FAFD; --branco:#FFFFFF; --tinta:#242424; --mudo:#6B6B6B;
+    --cinza-borda:#E6E9F2; --carvao:#0A0A10;
+    --ouro:#C9A05A; --ok:#0E9F6E;
     --s-1:8px; --s-2:16px; --s-3:24px; --s-4:40px; --s-5:64px; --s-6:96px;
-    --raio:16px;
-    --t:240ms cubic-bezier(.4,0,.2,1);
+    --t:260ms cubic-bezier(.4,0,.2,1);
   }
 
   *{margin:0;padding:0;box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;}
-  body{min-height:100vh;background:var(--preto);color:var(--texto);
+  body{min-height:100vh;background:var(--fundo);color:var(--tinta);
     font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;
     font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
     display:flex;flex-direction:column;}
 
-  /* ── atmosfera: luz fria no topo, calor dourado embaixo ── */
-  .atmosfera{position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(700px 420px at 50% -8%, rgba(72,86,140,.20) 0%, rgba(7,7,12,0) 66%),
-      radial-gradient(620px 420px at 14% 88%, rgba(160,118,48,.14) 0%, rgba(7,7,12,0) 70%),
-      radial-gradient(560px 380px at 92% 72%, rgba(160,118,48,.10) 0%, rgba(7,7,12,0) 72%);}
-  .atmosfera::after{content:"";position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");}
+  .faixa{width:100%;max-width:960px;margin:0 auto;padding:0 clamp(20px,5vw,32px);}
 
-  .faixa{width:100%;max-width:640px;margin:0 auto;padding:0 clamp(20px,5vw,24px);}
-  .pagina{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;}
+  /* ══ cabecalho ══ */
+  .barra{background:var(--branco);border-bottom:1px solid var(--cinza-borda);
+    position:sticky;top:0;z-index:20;}
+  .barra .faixa{display:flex;align-items:center;justify-content:space-between;gap:16px;height:70px;}
+  .barra img{height:26px;width:auto;display:block;}
+  .barra .etiqueta{display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--azul);}
+  .barra .etiqueta svg{width:15px;height:15px;}
 
-  /* ── topo ── */
-  header{padding:var(--s-4) 0 0;}
-  header img{height:22px;width:auto;display:block;margin:0 auto;}
+  /* ══ miolo ══ */
+  main{flex:1;padding:clamp(32px,6vw,64px) 0 var(--s-5);}
 
-  /* ── consulta ── */
-  main{flex:1;display:flex;align-items:center;padding:var(--s-5) 0;}
-  .consulta{width:100%;text-align:center;}
+  /* o certificado fica embaçado e inerte ate a verificacao passar */
+  #palco{transition:filter 620ms cubic-bezier(.4,0,.2,1), opacity 620ms, transform 620ms;}
+  body[data-estado="aguardando"] #palco{filter:blur(13px) saturate(.72);opacity:.5;
+    transform:scale(.985);pointer-events:none;user-select:none;}
+  body[data-estado="valido"] #palco{filter:none;opacity:1;transform:none;}
 
-  .selo{display:inline-flex;align-items:center;gap:9px;margin-bottom:var(--s-3);
-    padding:7px 15px;border-radius:999px;
-    background:rgba(213,171,105,.07);box-shadow:inset 0 0 0 1px rgba(213,171,105,.26);}
-  .selo i{display:block;width:3px;height:12px;border-radius:1px;
-    background:linear-gradient(180deg,var(--champanhe),var(--bronze));}
-  .selo span{font-size:9.5px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--ouro);white-space:nowrap;}
+  /* ── cartao do certificado ── */
+  .certificado{background:var(--branco);border:1px solid var(--cinza-borda);
+    border-radius:28px;overflow:hidden;position:relative;
+    box-shadow:0 1px 2px rgba(16,24,40,.04), 0 24px 56px -32px rgba(16,24,40,.22);}
 
-  h1{font-size:clamp(26px,5.4vw,38px);line-height:1.16;font-weight:300;color:#fff;
-    letter-spacing:-.02em;text-wrap:balance;}
-  h1 b{font-weight:800;}
+  /* faixa superior azul */
+  .crista{position:relative;overflow:hidden;padding:clamp(26px,5vw,38px) clamp(22px,5vw,40px);
+    background:linear-gradient(135deg,var(--azul-fundo) 0%,var(--azul) 52%,#1A5BE0 100%);
+    color:#fff;}
+  .crista::after{content:"";position:absolute;right:-70px;top:-90px;width:300px;height:300px;
+    border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.28),rgba(56,189,248,0) 68%);}
+  .crista .linha{position:relative;z-index:2;display:flex;align-items:center;gap:14px;}
 
-  .lead{margin:var(--s-3) auto 0;max-width:46ch;font-size:clamp(14.5px,2.4vw,16px);
-    color:var(--mudo);text-wrap:pretty;}
+  .visto{width:46px;height:46px;flex:none;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);}
+  .visto svg{width:24px;height:24px;}
+  .visto path{stroke:#fff;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:30;stroke-dashoffset:30;}
+  body[data-estado="valido"] .visto path{animation:risca .5s .3s ease forwards;}
+  @keyframes risca{to{stroke-dashoffset:0}}
 
-  /* ── formulario ── */
-  form{margin-top:var(--s-4);}
-  .campo{text-align:left;max-width:420px;margin:0 auto;}
-  label{display:block;margin-bottom:9px;font-size:10.5px;font-weight:800;
-    letter-spacing:.18em;text-transform:uppercase;color:var(--ouro);}
+  .crista h1{font-size:clamp(21px,4vw,27px);line-height:1.2;font-weight:800;letter-spacing:-.015em;}
+  .crista p{margin-top:7px;font-size:clamp(13.5px,2.4vw,15px);line-height:1.55;color:rgba(255,255,255,.84);
+    max-width:52ch;}
 
-  input{width:100%;padding:17px 18px;border-radius:12px;
-    border:1px solid var(--borda-forte);background:rgba(14,14,21,.9);
-    color:#fff;font-family:inherit;font-size:17px;font-weight:600;
-    letter-spacing:.06em;text-transform:uppercase;
-    transition:border-color var(--t),box-shadow var(--t),background var(--t);}
-  input::placeholder{color:#5C5A56;font-weight:500;letter-spacing:.04em;}
-  input:focus{outline:none;border-color:rgba(213,171,105,.7);background:rgba(20,20,29,.95);
-    box-shadow:0 0 0 4px rgba(213,171,105,.12);}
-  input[aria-invalid="true"]{border-color:rgba(255,154,138,.6);}
+  /* ── conteudo do certificado ── */
+  .miolo{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:clamp(24px,4vw,44px);
+    padding:clamp(26px,5vw,40px) clamp(22px,5vw,40px) clamp(28px,5vw,40px);align-items:start;}
 
-  .dica{margin-top:11px;font-size:13px;line-height:1.5;color:var(--apagado);}
+  dl.ficha{min-width:0;}
+  .linha{padding:15px 0;border-bottom:1px solid var(--cinza-borda);}
+  .linha:first-child{padding-top:0;}
+  .linha:last-child{border-bottom:0;padding-bottom:0;}
+  .linha dt{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--mudo);}
+  .linha dd{margin-top:5px;font-size:clamp(16px,2.6vw,18px);font-weight:700;color:var(--tinta);
+    word-break:break-word;}
+  .linha dd.codigo{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:16px;letter-spacing:.05em;color:var(--azul-fundo);}
 
-  .acao{display:inline-flex;align-items:center;justify-content:center;gap:10px;
-    width:100%;max-width:420px;margin-top:var(--s-3);min-height:52px;padding:15px 24px;
-    border:0;border-radius:999px;font-family:inherit;font-size:13px;font-weight:800;
-    letter-spacing:.16em;text-transform:uppercase;color:#0A0603;cursor:pointer;
-    background:linear-gradient(100deg,#C9A05A 0%,#F2E0B6 26%,#D9B274 52%,#C08F46 78%,#AE7C34 100%);
-    box-shadow:0 10px 30px -14px rgba(176,128,52,.75);
-    transition:filter var(--t),transform var(--t);}
-  .acao:hover{filter:brightness(1.07);transform:translateY(-2px);}
-  .acao:disabled{cursor:progress;filter:saturate(.5) brightness(.8);transform:none;}
-  .acao svg{width:17px;height:17px;flex:none;}
+  .selo-ok{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;
+    font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    background:rgba(14,159,110,.1);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(14,159,110,.28);}
+  .selo-ok i{width:7px;height:7px;border-radius:50%;background:var(--ok);}
 
-  /* rodinha de carregamento dentro do botao */
+  /* ── a placa ── */
+  .lado{text-align:center;}
+  .quadro{position:relative;padding:10px;border-radius:12px;
+    background:linear-gradient(160deg,#24242C 0%,#121219 48%,#0A0A10 100%);
+    box-shadow:0 20px 44px -20px rgba(16,24,40,.5), inset 0 1px 0 rgba(255,255,255,.08);}
+  .quadro img{display:block;width:100%;height:auto;border-radius:4px;}
+  /* brilho que atravessa a placa quando o certificado e validado */
+  .quadro::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(104deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.3) 50%,rgba(255,255,255,0) 62%);
+    transform:translateX(-130%);}
+  body[data-estado="valido"] .quadro::after{animation:varre 1.15s .55s ease-out;}
+  @keyframes varre{to{transform:translateX(130%)}}
+  .lado .legenda{margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--mudo);}
+
+  /* ── rodape do cartao ── */
+  .nota{padding:17px clamp(22px,5vw,40px);border-top:1px solid var(--cinza-borda);
+    background:var(--azul-leve);font-size:13px;line-height:1.6;color:#4A5570;}
+
+  .refazer{display:block;margin:var(--s-4) auto 0;min-height:48px;padding:13px 28px;
+    border:1px solid var(--cinza-borda);border-radius:999px;background:var(--branco);
+    font-family:inherit;font-size:12.5px;font-weight:800;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--tinta);cursor:pointer;
+    transition:border-color var(--t),color var(--t),background var(--t);}
+  .refazer:hover{border-color:var(--azul);color:var(--azul);background:var(--azul-leve);}
+
+  /* ══ rodape ══ */
+  footer{border-top:1px solid var(--cinza-borda);background:var(--branco);
+    padding:var(--s-4) 0;text-align:center;}
+  footer p{font-size:13px;line-height:1.7;color:var(--mudo);}
+  footer a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
+    padding:4px 12px;color:var(--azul);text-decoration:none;font-weight:600;}
+  footer a:hover{text-decoration:underline;}
+  footer .fino{font-size:12px;color:#6B7280;}
+
+  /* ══ pop-up da consulta ══ */
+  .cortina{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+    padding:20px;background:rgba(16,22,40,.42);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+  body[data-estado="valido"] .cortina{display:none;}
+
+  .caixa{position:relative;width:100%;max-width:440px;background:var(--branco);
+    border-radius:24px;padding:clamp(26px,5vw,36px);
+    box-shadow:0 30px 70px -26px rgba(16,24,40,.42), 0 2px 6px rgba(16,24,40,.06);
+    animation:entra .36s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes entra{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+
+  .caixa .marca{display:block;height:24px;width:auto;margin:0 auto var(--s-3);}
+  .caixa h2{font-size:clamp(20px,3.6vw,24px);line-height:1.22;font-weight:800;
+    letter-spacing:-.015em;text-align:center;}
+  .caixa .lead{margin-top:10px;font-size:14.5px;line-height:1.6;color:var(--mudo);text-align:center;}
+
+  form{margin-top:var(--s-3);}
+  label{display:block;margin-bottom:8px;font-size:11px;font-weight:700;
+    letter-spacing:.13em;text-transform:uppercase;color:var(--mudo);}
+  input{width:100%;padding:15px 16px;border-radius:14px;
+    border:1.5px solid var(--cinza-borda);background:#FCFDFF;color:var(--tinta);
+    font-family:inherit;font-size:17px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    transition:border-color var(--t),box-shadow var(--t);}
+  input::placeholder{color:#A8ADBC;font-weight:500;letter-spacing:.03em;}
+  input:focus{outline:none;border-color:var(--azul);box-shadow:0 0 0 4px rgba(0,64,200,.12);}
+  input[aria-invalid="true"]{border-color:#D92D20;box-shadow:0 0 0 4px rgba(217,45,32,.1);}
+
+  .dica{margin-top:9px;font-size:12.5px;line-height:1.5;color:#7B8090;}
+
+  .enviar{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    width:100%;margin-top:var(--s-3);min-height:52px;padding:14px 24px;border:0;border-radius:999px;
+    font-family:inherit;font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    color:#fff;cursor:pointer;background:var(--azul);
+    box-shadow:0 10px 26px -12px rgba(0,64,200,.7);
+    transition:background var(--t),transform var(--t),box-shadow var(--t);}
+  .enviar:hover{background:var(--azul-fundo);transform:translateY(-1px);}
+  .enviar:disabled{cursor:progress;background:#7D9BDC;transform:none;box-shadow:none;}
+
   .giro{width:16px;height:16px;flex:none;border-radius:50%;
-    border:2px solid rgba(10,6,3,.25);border-top-color:#0A0603;
+    border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
     animation:gira .62s linear infinite;}
   @keyframes gira{to{transform:rotate(360deg)}}
 
-  .recado{margin-top:12px;min-height:20px;font-size:13.5px;color:var(--erro);text-align:center;}
-
-  /* ── rodape ── */
-  footer{padding:var(--s-5) 0 var(--s-4);text-align:center;}
-  footer .risco{width:40px;height:2px;margin:0 auto var(--s-3);border-radius:2px;
-    background:linear-gradient(90deg,rgba(213,171,105,.12),var(--ouro),rgba(213,171,105,.12));}
-  footer .marca{height:19px;width:auto;display:block;margin:0 auto var(--s-2);opacity:.85;}
-  footer p{font-size:12.5px;line-height:1.7;color:var(--apagado);}
-  /* area de toque cheia, 44px, como manda o minimo */
-  footer a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;
-    padding:4px 12px;color:var(--ouro);text-decoration:none;}
-  footer a:hover{text-decoration:underline;}
-  footer .fino{margin-top:var(--s-2);font-size:11.5px;color:#7C7971;}
-
-  /* ── pop-up do resultado ── */
-  .fundo{position:fixed;inset:0;z-index:50;display:none;
-    align-items:center;justify-content:center;padding:20px;
-    background:rgba(4,4,8,.72);
-    -webkit-backdrop-filter:blur(14px) saturate(.9);backdrop-filter:blur(14px) saturate(.9);}
-  .fundo[aberto]{display:flex;animation:surge .28s ease both;}
-  @keyframes surge{from{opacity:0}to{opacity:1}}
-
-  .painel{position:relative;width:100%;max-width:520px;max-height:calc(100vh - 40px);
-    overflow-y:auto;border-radius:20px;isolation:isolate;
-    background:linear-gradient(170deg,var(--carvao-2) 0%,var(--carvao) 58%,#0A0A10 100%);
-    box-shadow:0 40px 90px -40px rgba(0,0,0,.95), 0 0 70px -34px rgba(213,171,105,.35);
-    animation:sobe .34s cubic-bezier(.2,.8,.2,1) both;}
-  @keyframes sobe{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
-  .painel::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;padding:1px;
-    background:linear-gradient(170deg,rgba(242,224,182,.40),rgba(213,171,105,.12) 44%,rgba(213,171,105,.03) 100%);
-    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-    mask-composite:exclude;}
-
-  .fechar{position:absolute;top:14px;right:14px;z-index:3;width:36px;height:36px;
-    display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;
-    background:rgba(255,255,255,.07);color:var(--mudo);cursor:pointer;
-    transition:background var(--t),color var(--t);}
-  .fechar:hover{background:rgba(255,255,255,.14);color:#fff;}
-  .fechar svg{width:16px;height:16px;}
-
-  .painel .corpo{padding:var(--s-4) clamp(22px,5vw,34px) var(--s-4);}
-
-  /* cabecalho do resultado */
-  .veredito{display:flex;align-items:center;gap:13px;}
-  .marca-v{width:42px;height:42px;flex:none;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;}
-  .marca-v svg{width:21px;height:21px;}
-  .valido .marca-v{background:rgba(111,211,155,.13);box-shadow:inset 0 0 0 1px rgba(111,211,155,.4);color:var(--ok);}
-  .invalido .marca-v{background:rgba(255,154,138,.11);box-shadow:inset 0 0 0 1px rgba(255,154,138,.38);color:var(--erro);}
-  .veredito h2{font-size:clamp(19px,3.6vw,22px);line-height:1.25;font-weight:800;color:#fff;letter-spacing:-.01em;}
-
-  .painel .explica{margin-top:var(--s-2);font-size:14.5px;line-height:1.6;color:var(--mudo);}
-
-  /* a placa */
-  .quadro{margin:var(--s-4) auto var(--s-3);width:min(200px,56%);padding:9px;
-    border-radius:8px;background:linear-gradient(160deg,#2A2A33 0%,#14141A 46%,#0B0B10 100%);
-    box-shadow:0 26px 52px -22px rgba(0,0,0,.9),
-               0 0 40px -16px rgba(201,160,90,.26),
-               inset 0 1px 0 rgba(255,255,255,.07);}
-  .placa{display:block;width:100%;height:auto;border-radius:3px;
-    box-shadow:0 2px 10px -2px rgba(0,0,0,.8), inset 0 0 0 1px rgba(0,0,0,.5);}
-
-  /* ficha de dados */
-  .ficha{margin-top:var(--s-3);border-top:1px solid var(--borda);}
-  .linha{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
-    padding:13px 0;border-bottom:1px solid var(--borda);}
-  .linha dt{flex:none;font-size:10.5px;font-weight:800;letter-spacing:.16em;
-    text-transform:uppercase;color:var(--apagado);}
-  .linha dd{text-align:right;font-size:15px;font-weight:600;color:var(--texto);}
-  .linha dd.destaque{color:var(--champanhe);}
-  .linha dd.codigo{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:14px;letter-spacing:.06em;color:var(--ouro);}
-
-  .status{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;
-    font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
-    background:rgba(111,211,155,.12);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(111,211,155,.34);}
-  .status i{width:6px;height:6px;border-radius:50%;background:var(--ok);}
-
-  .nota{margin-top:var(--s-3);font-size:12.5px;line-height:1.65;color:var(--apagado);}
-
-  .voltar{display:inline-flex;align-items:center;justify-content:center;
-    width:100%;margin-top:var(--s-3);min-height:46px;padding:12px 20px;
-    border:1px solid var(--borda-forte);border-radius:999px;background:transparent;
-    font-family:inherit;font-size:12px;font-weight:800;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--texto);cursor:pointer;
-    transition:background var(--t),border-color var(--t);}
-  .voltar:hover{background:rgba(255,255,255,.05);border-color:var(--ouro);}
+  /* erro dentro do proprio pop-up */
+  .erro{display:none;margin-top:var(--s-3);padding:14px 16px;border-radius:14px;
+    background:#FEF3F2;border:1px solid #FECDC9;
+    animation:entra .3s cubic-bezier(.2,.8,.2,1) both;}
+  .erro[visivel]{display:block;}
+  .erro .topo{display:flex;align-items:center;gap:9px;}
+  .erro .topo svg{width:17px;height:17px;flex:none;color:#D92D20;}
+  .erro .topo b{font-size:14.5px;font-weight:800;color:#B42318;}
+  .erro p{margin-top:5px;padding-left:26px;font-size:13.5px;line-height:1.55;color:#B42318;}
 
   a:focus-visible,button:focus-visible,input:focus-visible{
-    outline:2px solid var(--champanhe);outline-offset:3px;}
+    outline:2px solid var(--azul);outline-offset:3px;}
 
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
   }
 
+  @media (max-width:760px){
+    .miolo{grid-template-columns:1fr;gap:var(--s-3);}
+    .lado{max-width:220px;margin:0 auto;}
+  }
   @media (max-width:560px){
-    header{padding-top:var(--s-3);}
-    main{padding:var(--s-4) 0;}
-    .painel .corpo{padding:var(--s-3) 20px var(--s-3);}
-    .linha{flex-direction:column;align-items:flex-start;gap:4px;}
-    .linha dd{text-align:left;}
+    .barra .etiqueta span{display:none;}
+    main{padding-top:var(--s-3);}
+    .caixa{padding:24px 20px;border-radius:20px;}
   }
 </style>
 </head>
-<body>
+<body data-estado="aguardando">
 
-<div class="atmosfera" aria-hidden="true"></div>
+<header class="barra">
+  <div class="faixa">
+    <img src="assets/tutory-logo-azul.png" alt="Tutory" width="130" height="26">
+    <span class="etiqueta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6.5v5c0 4.6 3.2 8.6 8 9.5 4.8-.9 8-4.9 8-9.5v-5L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>
+      <span>Verificação de certificados</span>
+    </span>
+  </div>
+</header>
 
-<div class="pagina">
+<main class="faixa">
+  <div id="palco">
+    <article class="certificado" id="certificado">
 
-  <header class="faixa">
-    <img src="assets/tutory-logo.png" alt="Tutory" width="110" height="22">
-  </header>
-
-  <main class="faixa">
-    <section class="consulta">
-      <div class="selo"><i aria-hidden="true"></i><span>Programa de Reconhecimento</span></div>
-
-      <h1>Verificação de<br><b>Conquistas Tutory</b></h1>
-
-      <p class="lead">
-        Confirme a autenticidade de um certificado emitido pelo
-        Programa de Reconhecimento Tutory Mentoria.
-      </p>
-
-      <form id="forma" novalidate>
-        <div class="campo">
-          <label for="codigo">Código de verificação</label>
-          <input id="codigo" name="codigo" type="text" inputmode="text"
-                 autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false"
-                 placeholder="TUT-OURO-0125" maxlength="24" aria-describedby="dica recado">
-          <p class="dica" id="dica">O código está no certificado, logo abaixo da data da conquista.</p>
+      <div class="crista">
+        <div class="linha">
+          <span class="visto" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m4 12 5.5 5.5L20 7"/></svg>
+          </span>
+          <div>
+            <h1 id="titulo">Certificado autêntico</h1>
+            <p id="explica">Este certificado foi emitido pela Tutory e corresponde a uma conquista registrada na plataforma.</p>
+          </div>
         </div>
+      </div>
 
-        <button class="acao" id="enviar" type="submit">
-          <span id="rotulo">Verificar</span>
-        </button>
+      <div class="miolo">
+        <dl class="ficha">
+          <div class="linha"><dt>Mentor(a)</dt><dd id="d-mentor">—</dd></div>
+          <div class="linha"><dt>Mentoria</dt><dd id="d-mentoria">—</dd></div>
+          <div class="linha"><dt>Conquista</dt><dd id="d-conquista">—</dd></div>
+          <div class="linha"><dt>Data da conquista</dt><dd id="d-data">—</dd></div>
+          <div class="linha"><dt>Código</dt><dd class="codigo" id="d-codigo">—</dd></div>
+          <div class="linha"><dt>Status</dt>
+            <dd><span class="selo-ok"><i aria-hidden="true"></i>Válido</span></dd></div>
+        </dl>
 
-        <p class="recado" id="recado" role="status" aria-live="polite"></p>
-      </form>
-    </section>
-  </main>
+        <div class="lado">
+          <div class="quadro">
+            <img src="assets/placa-ouro.jpg" alt="Placa Ouro da Mentoria Tutory" width="580" height="820">
+          </div>
+          <p class="legenda">Placa Ouro</p>
+        </div>
+      </div>
 
-  <footer class="faixa">
-    <div class="risco" aria-hidden="true"></div>
-    <img class="marca" src="assets/tutory-logo.png" alt="Tutory" width="100" height="19">
+      <p class="nota">A conferência considera os registros da plataforma no momento da consulta.
+        Em caso de dúvida sobre um certificado, fale com a Tutory.</p>
+    </article>
+
+    <button class="refazer" id="refazer" type="button">Verificar outro código</button>
+  </div>
+</main>
+
+<footer>
+  <div class="faixa">
     <p><a href="https://www.tutory.com.br" target="_blank" rel="noopener">tutory.com.br</a></p>
     <p class="fino">Programa de Reconhecimento Tutory Mentoria</p>
-  </footer>
+  </div>
+</footer>
 
-</div>
+<!-- consulta -->
+<div class="cortina" id="cortina" role="dialog" aria-modal="true" aria-labelledby="consulta-titulo">
+  <div class="caixa" id="caixa">
+    <img class="marca" src="assets/tutory-logo-azul.png" alt="Tutory" width="120" height="24">
+    <h2 id="consulta-titulo">Verificação de Conquistas</h2>
+    <p class="lead">Confirme a autenticidade de um certificado emitido pelo
+      Programa de Reconhecimento Tutory Mentoria.</p>
 
-<!-- resultado -->
-<div class="fundo" id="fundo" role="dialog" aria-modal="true" aria-labelledby="veredito-titulo">
-  <div class="painel" id="painel">
-    <button class="fechar" id="fechar" type="button" aria-label="Fechar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="corpo" id="corpo"></div>
+    <form id="forma" novalidate>
+      <label for="codigo">Código de verificação</label>
+      <input id="codigo" name="codigo" type="text" inputmode="text"
+             autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false"
+             placeholder="TUT-OURO-0125" maxlength="24" aria-describedby="dica">
+      <p class="dica" id="dica">O código está no certificado, logo abaixo da data da conquista.</p>
+
+      <button class="enviar" id="enviar" type="submit"><span id="rotulo">Verificar</span></button>
+
+      <div class="erro" id="erro" role="alert">
+        <div class="topo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          <b id="erro-titulo">Código não encontrado</b>
+        </div>
+        <p id="erro-texto">Não encontramos nenhum certificado com este código. Confira se ele foi digitado corretamente.</p>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -273,173 +302,107 @@
 (function () {
   'use strict';
 
-  /* ── configuração ────────────────────────────────────
-     O SAL precisa ser idêntico ao do gerar-certificado.py */
+  /* O SAL precisa ser idêntico ao do gerar-certificado.py */
   var SAL = 'tutory-conquistas-2026';
 
-  var raiz   = document.documentElement;
-  var forma  = document.getElementById('forma');
-  var campo  = document.getElementById('codigo');
-  var enviar = document.getElementById('enviar');
-  var rotulo = document.getElementById('rotulo');
-  var recado = document.getElementById('recado');
-  var fundo  = document.getElementById('fundo');
-  var painel = document.getElementById('painel');
-  var corpo  = document.getElementById('corpo');
-  var fechar = document.getElementById('fechar');
-  var ultimoFoco = null;
+  var corpo   = document.body;
+  var forma   = document.getElementById('forma');
+  var campo   = document.getElementById('codigo');
+  var enviar  = document.getElementById('enviar');
+  var rotulo  = document.getElementById('rotulo');
+  var erro    = document.getElementById('erro');
+  var eTitulo = document.getElementById('erro-titulo');
+  var eTexto  = document.getElementById('erro-texto');
+  var refazer = document.getElementById('refazer');
 
-  /* ── derivação do caminho ────────────────────────────
-     maiúsculas, sem acento, só A-Z e 0-9: o traço é opcional,
-     então TUT-OURO-125, tut ouro 125 e TUTOURO125 abrem o mesmo. */
   function normalizar(c) {
     return c.toUpperCase()
             .normalize('NFD').replace(/[̀-ͯ]/g, '')
             .replace(/[^A-Z0-9]/g, '');
   }
-
   function hex(buf) {
     var b = new Uint8Array(buf), s = '';
     for (var i = 0; i < b.length; i++) s += b[i].toString(16).padStart(2, '0');
     return s;
   }
-
   function caminhoDo(codigo) {
     var base = normalizar(codigo);
     if (!base) return Promise.resolve(null);
-    var dados = new TextEncoder().encode(SAL + base);
-    return crypto.subtle.digest('SHA-256', dados).then(function (buf) {
+    if (!(window.crypto && crypto.subtle)) {
+      return Promise.reject(new Error('sem-crypto'));
+    }
+    var d = new TextEncoder().encode(SAL + base);
+    return crypto.subtle.digest('SHA-256', d).then(function (buf) {
       return 'dados/' + hex(buf).slice(0, 24) + '.json';
     });
   }
 
-  function escapar(t) {
-    return String(t == null ? '' : t)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+  function preencher(d) {
+    document.getElementById('d-mentor').textContent    = d.mentor || '—';
+    document.getElementById('d-mentoria').textContent  = d.mentoria || '—';
+    document.getElementById('d-conquista').textContent =
+      (d.conquista || '') + (d.alunos ? ' · ' + d.alunos : '');
+    document.getElementById('d-data').textContent      = d.data || '—';
+    document.getElementById('d-codigo').textContent    = d.codigo || '—';
+    document.title = 'Certificado ' + (d.codigo || '') + ' · Tutory';
   }
 
-  /* ── telas do resultado ──────────────────────────── */
-  var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5.5 5.5L20 7"/></svg>';
-  var XIS   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-
-  function telaValida(d) {
-    return '' +
-      '<div class="veredito valido">' +
-        '<span class="marca-v" aria-hidden="true">' + CHECK + '</span>' +
-        '<h2 id="veredito-titulo">Certificado autêntico</h2>' +
-      '</div>' +
-      '<p class="explica">Este certificado foi emitido pela Tutory e corresponde a uma ' +
-        'conquista registrada na plataforma.</p>' +
-      '<div class="quadro"><img class="placa" src="assets/placa-ouro.jpg" ' +
-        'alt="Placa Ouro da Mentoria Tutory" width="580" height="820"></div>' +
-      '<dl class="ficha">' +
-        linha('Mentor(a)', escapar(d.mentor)) +
-        linha('Mentoria', escapar(d.mentoria)) +
-        linha('Conquista', escapar(d.conquista) + ' &middot; ' + escapar(d.alunos), 'destaque') +
-        linha('Data da conquista', escapar(d.data)) +
-        linha('Código', escapar(d.codigo), 'codigo') +
-        '<div class="linha"><dt>Status</dt><dd>' +
-          '<span class="status"><i aria-hidden="true"></i>Válido</span>' +
-        '</dd></div>' +
-      '</dl>' +
-      '<p class="nota">A conferência considera os registros da plataforma no momento da consulta.</p>' +
-      '<button class="voltar" type="button" data-fechar>Verificar outro código</button>';
-  }
-
-  function telaInvalida() {
-    return '' +
-      '<div class="veredito invalido">' +
-        '<span class="marca-v" aria-hidden="true">' + XIS + '</span>' +
-        '<h2 id="veredito-titulo">Código não encontrado</h2>' +
-      '</div>' +
-      '<p class="explica">Não encontramos nenhum certificado com este código. ' +
-        'Confira se ele foi digitado corretamente.</p>' +
-      '<p class="nota">O código fica no certificado, logo abaixo da data da conquista. ' +
-        'Ele começa com TUT e não diferencia maiúsculas de minúsculas.</p>' +
-      '<button class="voltar" type="button" data-fechar>Tentar de novo</button>';
-  }
-
-  function linha(rot, val, classe) {
-    return '<div class="linha"><dt>' + rot + '</dt>' +
-           '<dd' + (classe ? ' class="' + classe + '"' : '') + '>' + val + '</dd></div>';
-  }
-
-  /* ── abrir e fechar ──────────────────────────────── */
-  function abrir(html) {
-    ultimoFoco = document.activeElement;
-    corpo.innerHTML = html;
-    fundo.setAttribute('aberto', '');
-    document.body.style.overflow = 'hidden';
-    painel.scrollTop = 0;
-    setTimeout(function () {
-      var b = corpo.querySelector('[data-fechar]');
-      (b || fechar).focus();
-    }, 60);
-  }
-
-  function fecharTudo() {
-    fundo.removeAttribute('aberto');
-    document.body.style.overflow = '';
-    if (ultimoFoco) ultimoFoco.focus();
-  }
-
-  fechar.addEventListener('click', fecharTudo);
-  fundo.addEventListener('click', function (e) { if (e.target === fundo) fecharTudo(); });
-  corpo.addEventListener('click', function (e) {
-    if (e.target.closest('[data-fechar]')) { fecharTudo(); campo.select(); }
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && fundo.hasAttribute('aberto')) fecharTudo();
-    /* prende o foco dentro do pop-up */
-    if (e.key === 'Tab' && fundo.hasAttribute('aberto')) {
-      var itens = painel.querySelectorAll('button, [href], input');
-      if (!itens.length) return;
-      var pri = itens[0], ult = itens[itens.length - 1];
-      if (e.shiftKey && document.activeElement === pri) { e.preventDefault(); ult.focus(); }
-      else if (!e.shiftKey && document.activeElement === ult) { e.preventDefault(); pri.focus(); }
-    }
-  });
-
-  /* ── consulta ────────────────────────────────────── */
-  function erro(txt) {
-    recado.textContent = txt;
+  function mostrarErro(titulo, texto) {
+    eTitulo.textContent = titulo;
+    eTexto.textContent = texto;
+    erro.setAttribute('visivel', '');
     campo.setAttribute('aria-invalid', 'true');
+    campo.focus();
   }
   function limpar() {
-    recado.textContent = '';
+    erro.removeAttribute('visivel');
     campo.removeAttribute('aria-invalid');
   }
-
   campo.addEventListener('input', limpar);
+
+  /* segura a resposta por 750ms: instantâneo demais não parece conferência */
+  function esperar(t0) {
+    return new Promise(function (r) { setTimeout(r, Math.max(0, 750 - (Date.now() - t0))); });
+  }
 
   forma.addEventListener('submit', function (e) {
     e.preventDefault();
     var codigo = campo.value.trim();
 
     if (!normalizar(codigo)) {
-      erro('Digite o código que está no certificado.');
-      campo.focus();
+      mostrarErro('Digite o código', 'O código está no certificado, logo abaixo da data da conquista.');
       return;
     }
 
+    limpar();
     enviar.disabled = true;
     rotulo.textContent = 'Verificando';
-    enviar.insertBefore(Object.assign(document.createElement('span'),
-      { className: 'giro' }), enviar.firstChild);
-    limpar();
+    enviar.insertBefore(Object.assign(document.createElement('span'), { className: 'giro' }), enviar.firstChild);
 
-    var comecou = Date.now();
+    var t0 = Date.now();
 
-    caminhoDo(codigo).then(function (caminho) {
-      return fetch(caminho, { cache: 'no-store' }).then(function (r) {
+    caminhoDo(codigo).then(function (c) {
+      return fetch(c, { cache: 'no-store' }).then(function (r) {
         if (!r.ok) throw new Error('nao encontrado');
         return r.json();
       });
     }).then(function (d) {
-      return esperar(comecou).then(function () { abrir(telaValida(d)); });
-    }).catch(function () {
-      return esperar(comecou).then(function () { abrir(telaInvalida()); });
+      return esperar(t0).then(function () {
+        preencher(d);
+        corpo.setAttribute('data-estado', 'valido');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(function () { refazer.focus(); }, 700);
+      });
+    }).catch(function (e) {
+      return esperar(t0).then(function () {
+        if (e && e.message === 'sem-crypto') {
+          mostrarErro('Não foi possível verificar',
+            'Abra esta página por um endereço seguro, começando com https.');
+        } else {
+          mostrarErro('Código não encontrado',
+            'Não encontramos nenhum certificado com este código. Confira se ele foi digitado corretamente.');
+        }
+      });
     }).then(function () {
       var g = enviar.querySelector('.giro');
       if (g) g.remove();
@@ -448,21 +411,24 @@
     });
   });
 
-  /* segura o resultado por pelo menos 700ms: sem isso a resposta
-     é instantânea demais e não parece que algo foi conferido */
-  function esperar(comecou) {
-    var falta = Math.max(0, 700 - (Date.now() - comecou));
-    return new Promise(function (r) { setTimeout(r, falta); });
-  }
+  refazer.addEventListener('click', function () {
+    corpo.setAttribute('data-estado', 'aguardando');
+    document.title = 'Verificação de Conquistas · Tutory';
+    campo.value = '';
+    limpar();
+    setTimeout(function () { campo.focus(); }, 80);
+  });
 
-  /* código já na URL: /?codigo=TUT-OURO-0125 verifica sozinho */
+  setTimeout(function () { campo.focus(); }, 220);
+
+  /* ?codigo=TUT-OURO-0125 verifica sozinho: serve para o QR do certificado */
   try {
     var p = new URLSearchParams(location.search).get('codigo');
     if (p) {
       campo.value = p.toUpperCase();
       setTimeout(function () {
         forma.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }, 260);
+      }, 240);
     }
   } catch (e) { /* URL estranha não pode travar a página */ }
 })();
