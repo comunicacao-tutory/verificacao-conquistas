@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="305" viewBox="0 0 820 305">
+  <defs>
+    <linearGradient id="alt" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0"   stop-color="#fff" stop-opacity="1"/>
+      <stop offset=".3"  stop-color="#fff" stop-opacity=".96"/>
+      <stop offset=".66" stop-color="#fff" stop-opacity=".48"/>
+      <stop offset="1"   stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="m"><rect width="820" height="305" fill="url(#alt)"/></mask>
+
+    <filter id="f" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.0076 0.0115" numOctaves="6"
+                    seed="9" stitchTiles="stitch" result="t"/>
+      <feColorMatrix in="t" type="luminanceToAlpha" result="a"/>
+      <!-- o ruido vive em torno de 0,5; esticar a faixa e o que cria
+           nucleo denso e vazio, em vez de um veu cinza uniforme -->
+      <feComponentTransfer in="a" result="a2">
+        <feFuncA type="linear" slope="3.6" intercept="-1.62"/>
+      </feComponentTransfer>
+      <feComponentTransfer in="a2" result="a3">
+        <feFuncA type="gamma" exponent="0.78" amplitude="1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#FAFBFE" result="w"/>
+      <feComposite in="w" in2="a3" operator="in" result="s"/>
+      <feGaussianBlur in="s" stdDeviation="2.6"/>
+    </filter>
+  </defs>
+  <g mask="url(#m)"><rect width="820" height="305" filter="url(#f)"/></g>
+</svg>
