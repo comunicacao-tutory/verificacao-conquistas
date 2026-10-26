@@ -26,6 +26,7 @@
     --cinza-borda:#E6E9F2; --carvao:#0A0A10;
     --ouro:#C9A05A; --ok:#0E9F6E;
     --s-1:8px; --s-2:16px; --s-3:24px; --s-4:40px; --s-5:64px; --s-6:96px;
+    --topo:71px; /* altura da barra: 70px + 1px de borda */
     --t:260ms cubic-bezier(.4,0,.2,1);
   }
 
@@ -41,7 +42,8 @@
   /* ══ cabecalho ══ */
   .barra{background:var(--branco);border-bottom:1px solid var(--cinza-borda);
     position:sticky;top:0;z-index:20;}
-  .barra .faixa{display:flex;align-items:center;justify-content:space-between;gap:16px;height:70px;}
+  .barra .faixa{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    height:calc(var(--topo) - 1px);}
   .barra img{height:26px;width:auto;display:block;}
   .barra .etiqueta{display:inline-flex;align-items:center;gap:8px;
     font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--azul);}
@@ -53,9 +55,117 @@
 
   /* o certificado fica embaçado e inerte ate a verificacao passar */
   #palco{transition:filter 620ms cubic-bezier(.4,0,.2,1), opacity 620ms, transform 620ms;}
-  body[data-estado="aguardando"] #palco{filter:blur(13px) saturate(.72);opacity:.5;
+  body[data-estado="aguardando"] #palco,
+  body[data-estado="consultando"] #palco{filter:blur(13px) saturate(.72);opacity:.5;
     transform:scale(.985);pointer-events:none;user-select:none;}
   body[data-estado="valido"] #palco{filter:none;opacity:1;transform:none;}
+
+
+  /* ══════ PALCO ══════════════════════════════════════════
+     Abre escuro, com pódio e fumaça em looping. O quadro só
+     materializa depois que a verificação passa. */
+  .palco{position:relative;min-height:calc(100svh - var(--topo));overflow:hidden;background:#05050A;
+    display:flex;align-items:center;justify-content:center;}
+
+  /* escuridão e holofote, em CSS para escalar em qualquer largura */
+  .palco .luz{position:absolute;inset:0;
+    background:
+      radial-gradient(560px 70vh at 50% -6%, rgba(236,232,224,.17) 0%, rgba(5,5,10,0) 64%),
+      radial-gradient(900px 60vh at 50% 108%, rgba(188,150,74,.10) 0%, rgba(5,5,10,0) 70%),
+      linear-gradient(180deg,#07070D 0%,#0A0A11 52%,#05050A 100%);}
+  /* feixe do refletor */
+  .palco .feixe{position:absolute;left:50%;top:-14vh;width:min(560px,74vw);height:72vh;
+    transform:translateX(-50%);pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,252,244,.13) 0%,rgba(255,252,244,.045) 42%,rgba(255,252,244,0) 100%);
+    clip-path:polygon(40% 0,60% 0,100% 100%,0 100%);
+    animation:tremeluz 7s ease-in-out infinite;}
+  @keyframes tremeluz{0%,100%{opacity:.85}50%{opacity:1}}
+
+  /* base: pódio e fumaça */
+  .palco .base{position:absolute;left:0;right:0;bottom:0;height:min(62vh,560px);
+    background:url('assets/palco-base.jpg') center bottom/cover no-repeat;
+    -webkit-mask-image:radial-gradient(118% 108% at 50% 100%,#000 48%,rgba(0,0,0,.4) 76%,transparent 97%);
+            mask-image:radial-gradient(118% 108% at 50% 100%,#000 48%,rgba(0,0,0,.4) 76%,transparent 97%);}
+
+  /* névoa em CSS: a fumaça da foto, recortada, ficava escura demais,
+     e usar a imagem inteira trazia um segundo pódio junto. */
+  .palco .fumaca{position:absolute;left:-25%;right:-25%;bottom:-8%;height:46vh;
+    pointer-events:none;filter:blur(30px);}
+  .palco .fumaca::before,.palco .fumaca::after{content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(38% 58% at 16% 72%, rgba(228,230,238,.46) 0%, rgba(228,230,238,0) 70%),
+      radial-gradient(34% 52% at 40% 62%, rgba(206,211,223,.38) 0%, rgba(206,211,223,0) 72%),
+      radial-gradient(42% 60% at 68% 74%, rgba(228,230,238,.42) 0%, rgba(228,230,238,0) 70%),
+      radial-gradient(30% 48% at 88% 64%, rgba(196,202,216,.32) 0%, rgba(196,202,216,0) 74%);}
+  .palco .fumaca.a{opacity:.55;}
+  .palco .fumaca.a::before{animation:neblina-a 30s ease-in-out infinite;}
+  .palco .fumaca.a::after{opacity:.6;animation:neblina-b 44s ease-in-out infinite;}
+  .palco .fumaca.b{opacity:.32;height:34vh;filter:blur(44px);}
+  .palco .fumaca.b::before{animation:neblina-b 38s ease-in-out infinite reverse;}
+  .palco .fumaca.b::after{display:none;}
+  @keyframes neblina-a{
+    0%,100%{transform:translate3d(-3%,0,0) scale(1.05)}
+    50%    {transform:translate3d(4%,-3%,0) scale(1.16)}}
+  @keyframes neblina-b{
+    0%,100%{transform:translate3d(4%,-2%,0) scale(1.14)}
+    50%    {transform:translate3d(-4%,1%,0) scale(1.02)}}
+
+  /* ── o quadro ── */
+  .vitrine{position:relative;z-index:4;width:min(360px,62vw,41vh);
+    margin-bottom:min(20vh,170px);
+    opacity:0;transform:translateY(26px) scale(.9);filter:blur(6px);}
+  body[data-estado="valido"] .vitrine{animation:materializa 1.5s cubic-bezier(.2,.75,.25,1) .25s forwards;}
+  @keyframes materializa{
+    0%  {opacity:0;transform:translateY(26px) scale(.9);filter:blur(6px);}
+    62% {opacity:1;}
+    100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}}
+
+  /* depois de materializar, flutua de leve pra cima e pra baixo */
+  .vitrine .flutua{animation:none;}
+  body[data-estado="valido"] .vitrine .flutua{animation:flutuar 6.5s ease-in-out 1.8s infinite;}
+  @keyframes flutuar{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+  .vitrine .moldura-fisica{position:relative;padding:min(16px,3.4vw);border-radius:6px;
+    background:linear-gradient(152deg,#3A3A42 0%,#1A1A20 36%,#0D0D12 70%,#23232A 100%);
+    box-shadow:0 44px 70px -30px rgba(0,0,0,.95),
+               0 0 90px -26px rgba(214,154,52,.42),
+               inset 0 1px 0 rgba(255,255,255,.14),
+               inset 0 -1px 0 rgba(0,0,0,.6);}
+  .vitrine img{display:block;width:100%;height:auto;border-radius:2px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.65), 0 10px 22px -8px rgba(0,0,0,.8);}
+  /* reflexo de vidro sobre o quadro */
+  .vitrine .moldura-fisica::after{content:"";position:absolute;inset:0;border-radius:inherit;
+    pointer-events:none;
+    background:linear-gradient(118deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.13) 50%,rgba(255,255,255,0) 60%);}
+
+  /* sombra projetada no pódio */
+  .vitrine::after{content:"";position:absolute;left:50%;bottom:-7%;width:76%;height:22px;
+    transform:translateX(-50%);border-radius:50%;z-index:-1;
+    background:radial-gradient(ellipse,rgba(0,0,0,.75),rgba(0,0,0,0) 72%);filter:blur(5px);}
+
+  /* convite para descer */
+  .descer{position:absolute;left:50%;bottom:26px;z-index:5;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+    color:rgba(240,237,230,.92);opacity:0;transition:opacity .7s ease 2.4s;
+    border:1px solid rgba(255,255,255,.16);cursor:pointer;font-family:inherit;
+    padding:12px 22px 10px;border-radius:22px;
+    background:rgba(8,8,14,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    box-shadow:0 10px 30px -12px rgba(0,0,0,.8);
+    white-space:nowrap;max-width:calc(100vw - 32px);}
+  .descer:hover{background:rgba(8,8,14,.78);color:#fff;}
+  .descer:focus-visible{outline:2px solid rgba(255,255,255,.7);outline-offset:3px;}
+  body[data-estado="valido"] .descer{opacity:1;}
+  .descer svg{width:17px;height:17px;animation:acena 2.2s ease-in-out infinite;}
+  @keyframes acena{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+  /* degradê que leva do palco para os dados */
+  /* o palco ja termina escuro, entao a transicao sobe devagar
+     ate o claro, sem faixa dura no meio */
+  .transicao{height:clamp(110px,16vh,190px);
+    background:linear-gradient(180deg,
+      #05050A 0%, #0B0C14 22%, #1E212E 44%, #4A5168 64%,
+      #9AA2B8 80%, #DDE2EE 92%, var(--fundo) 100%);}
 
   /* ── o documento ──────────────────────────────────────
      Tratado como certificado, nao como ficha de dados: o nome
@@ -173,6 +283,8 @@
   .cortina{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
     padding:20px;background:rgba(16,22,40,.42);
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+  .cortina{opacity:0;pointer-events:none;transition:opacity .5s ease;}
+  body[data-estado="consultando"] .cortina{opacity:1;pointer-events:auto;}
   body[data-estado="valido"] .cortina{display:none;}
 
   .caixa{position:relative;width:100%;max-width:440px;background:var(--branco);
@@ -247,11 +359,25 @@
     .declara{line-height:1.55;}
   }
 
+  @media (min-width:900px){
+    .palco .base{left:50%;right:auto;transform:translateX(-50%);width:min(1020px,88vw);
+      -webkit-mask-image:radial-gradient(118% 108% at 50% 100%,#000 48%,rgba(0,0,0,.4) 76%,transparent 97%),
+                         linear-gradient(90deg,transparent 0,#000 15%,#000 85%,transparent 100%);
+      -webkit-mask-composite:source-in;
+      mask-image:radial-gradient(118% 108% at 50% 100%,#000 48%,rgba(0,0,0,.4) 76%,transparent 97%),
+                 linear-gradient(90deg,transparent 0,#000 15%,#000 85%,transparent 100%);
+      mask-composite:intersect;}
+  }
+
   @media (max-width:620px){
     .registro{gap:12px 24px;}
   }
+  /* celular: a barra encolhe e o palco acompanha pelo token */
   @media (max-width:560px){
+    :root{--topo:59px;}
     .barra .etiqueta span{display:none;}
+    .descer{bottom:18px;font-size:10px;letter-spacing:.16em;gap:6px;}
+    .vitrine{margin-bottom:min(16vh,120px);}
     main{padding-top:var(--s-3);}
     .caixa{padding:24px 20px;border-radius:20px;}
   }
@@ -261,7 +387,7 @@
 
 <header class="barra">
   <div class="faixa">
-    <img src="assets/tutory-logo-azul.png" alt="Tutory" width="130" height="26">
+    <img src="assets/tutory-logo.svg" alt="Tutory" width="110" height="26">
     <span class="etiqueta">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6.5v5c0 4.6 3.2 8.6 8 9.5 4.8-.9 8-4.9 8-9.5v-5L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>
       <span>Verificação de certificados</span>
@@ -269,7 +395,30 @@
   </div>
 </header>
 
-<main class="faixa">
+<section class="palco" id="palco-cena">
+  <div class="luz" aria-hidden="true"></div>
+  <div class="feixe" aria-hidden="true"></div>
+  <div class="base" aria-hidden="true"></div>
+  <div class="fumaca a" aria-hidden="true"></div>
+  <div class="fumaca b" aria-hidden="true"></div>
+
+  <div class="vitrine" id="vitrine" aria-hidden="true">
+    <div class="flutua">
+      <div class="moldura-fisica">
+        <img src="assets/placa-ouro.jpg" alt="" width="580" height="820">
+      </div>
+    </div>
+  </div>
+
+  <button class="descer" id="descer" type="button">
+    Ver os dados do certificado
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+  </button>
+</section>
+
+<div class="transicao" aria-hidden="true"></div>
+
+<main class="faixa" id="dados">
   <div id="palco">
     <article class="documento" id="certificado" tabindex="-1" aria-live="polite">
       <div class="moldura">
@@ -288,7 +437,7 @@
           <p class="declara" id="declara">
             conquistou a <strong>Placa Ouro</strong> do Programa de Reconhecimento
             Tutory Mentoria, ao alcançar <strong>100 alunos</strong> na
-            <strong id="d-mentoria">—</strong>.
+            <strong>—</strong>.
           </p>
 
           <div class="premio">
@@ -343,7 +492,7 @@
 <!-- consulta -->
 <div class="cortina" id="cortina" role="dialog" aria-modal="true" aria-labelledby="consulta-titulo">
   <div class="caixa" id="caixa">
-    <img class="marca" src="assets/tutory-logo-azul.png" alt="Tutory" width="120" height="24">
+    <img class="marca" src="assets/tutory-logo.svg" alt="Tutory" width="102" height="24">
     <h2 id="consulta-titulo">Verificação de Conquistas</h2>
     <p class="lead">Confirme a autenticidade de um certificado emitido pelo
       Programa de Reconhecimento Tutory Mentoria.</p>
@@ -409,7 +558,6 @@
 
   function preencher(d) {
     document.getElementById('d-mentor').textContent   = d.mentor || '—';
-    document.getElementById('d-mentoria').textContent = d.mentoria || '—';
     document.getElementById('d-conquista').textContent = d.conquista || 'Placa Ouro';
     document.getElementById('d-alunos').textContent   = d.alunos || '';
     document.getElementById('d-data').textContent     = d.data || '—';
@@ -472,6 +620,7 @@
         preencher(d);
         corpo.setAttribute('data-estado', 'valido');
         window.scrollTo({ top: 0, behavior: 'auto' });
+        /* o quadro materializa no palco; quem quiser os dados desce */
         /* preventScroll e obrigatorio: focar um elemento rola ele para a
            vista, e sem isso a pagina saltava para o rodape, onde fica o
            botao, escondendo o certificado inteiro. */
@@ -499,14 +648,33 @@
   });
 
   refazer.addEventListener('click', function () {
-    corpo.setAttribute('data-estado', 'aguardando');
+    corpo.setAttribute('data-estado', 'consultando');
     document.title = 'Verificação de Conquistas · Tutory';
     campo.value = '';
     limpar();
-    setTimeout(function () { campo.focus(); }, 80);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(function () { campo.focus(); }, 120);
   });
 
-  setTimeout(function () { campo.focus(); }, 220);
+  /* suspense: o palco fica sozinho antes do pop-up entrar.
+     Com codigo na URL abrimos logo, porque ali a pessoa ja decidiu. */
+  var comCodigo = false;
+  try { comCodigo = !!new URLSearchParams(location.search).get('codigo'); } catch (e) {}
+
+  function abrirConsulta() {
+    if (corpo.getAttribute('data-estado') === 'valido') return;
+    corpo.setAttribute('data-estado', 'consultando');
+    setTimeout(function () { campo.focus(); }, 420);
+  }
+  setTimeout(abrirConsulta, comCodigo ? 300 : 2600);
+
+  /* rolar ate os dados */
+  var descer = document.getElementById('descer');
+  descer.addEventListener('click', function () {
+    document.getElementById('dados').scrollIntoView({
+      behavior: 'smooth', block: 'start'
+    });
+  });
 
   /* ?codigo=TUT-OURO-0125 verifica sozinho: serve para o QR do certificado */
   try {
