@@ -56,69 +56,90 @@
     transform:scale(.985);pointer-events:none;user-select:none;}
   body[data-estado="valido"] #palco{filter:none;opacity:1;transform:none;}
 
-  /* ── cartao do certificado ── */
-  .certificado{background:var(--branco);border:1px solid var(--cinza-borda);
-    border-radius:28px;overflow:hidden;position:relative;
-    box-shadow:0 1px 2px rgba(16,24,40,.04), 0 24px 56px -32px rgba(16,24,40,.22);}
+  /* ── o documento ──────────────────────────────────────
+     Tratado como certificado, nao como ficha de dados: o nome
+     e o heroi, o resto e registro. */
+  .documento{position:relative;background:var(--branco);border-radius:26px;
+    border:1px solid var(--cinza-borda);overflow:hidden;
+    box-shadow:0 1px 2px rgba(16,24,40,.04), 0 34px 70px -38px rgba(10,42,140,.28);}
 
-  /* faixa superior azul */
-  .crista{position:relative;overflow:hidden;padding:clamp(26px,5vw,38px) clamp(22px,5vw,40px);
-    background:linear-gradient(135deg,var(--azul-fundo) 0%,var(--azul) 52%,#1A5BE0 100%);
-    color:#fff;}
-  .crista::after{content:"";position:absolute;right:-70px;top:-90px;width:300px;height:300px;
-    border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.28),rgba(56,189,248,0) 68%);}
-  .crista .linha{position:relative;z-index:2;display:flex;align-items:center;gap:14px;}
+  /* fio azul no topo, no lugar da faixa pesada */
+  .documento::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;z-index:3;
+    background:linear-gradient(90deg,var(--azul-fundo),var(--azul) 42%,var(--azul-ceu));}
 
-  .visto{width:46px;height:46px;flex:none;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);}
-  .visto svg{width:24px;height:24px;}
-  .visto path{stroke:#fff;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  /* textura de papel, quase imperceptivel */
+  .documento::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23p)' opacity='.028'/%3E%3C/svg%3E");}
+
+  .moldura{position:relative;z-index:2;margin:clamp(16px,2.6vw,22px);
+    border:1px solid var(--azul-borda);border-radius:16px;
+    padding:clamp(28px,5vw,52px) clamp(22px,5vw,52px) clamp(22px,4vw,34px);}
+
+  .conteudo{display:grid;grid-template-columns:minmax(0,1fr) clamp(190px,24vw,248px);
+    gap:clamp(28px,5vw,56px);align-items:center;}
+
+  /* ── selo de verificado ── */
+  .selo{display:inline-flex;align-items:center;gap:10px;margin-bottom:clamp(20px,3.4vw,28px);
+    padding:8px 16px 8px 9px;border-radius:999px;
+    background:var(--azul-leve);box-shadow:inset 0 0 0 1px var(--azul-borda);}
+  .selo .disco{width:26px;height:26px;flex:none;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;background:var(--azul);
+    box-shadow:0 2px 6px -1px rgba(0,64,200,.5), inset 0 1px 0 rgba(255,255,255,.4);}
+  .selo .disco svg{width:14px;height:14px;}
+  .selo .disco path{stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;
     stroke-dasharray:30;stroke-dashoffset:30;}
-  body[data-estado="valido"] .visto path{animation:risca .5s .3s ease forwards;}
+  body[data-estado="valido"] .selo .disco path{animation:risca .5s .35s ease forwards;}
   @keyframes risca{to{stroke-dashoffset:0}}
+  .selo b{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--azul-fundo);}
 
-  .crista h1{font-size:clamp(21px,4vw,27px);line-height:1.2;font-weight:800;letter-spacing:-.015em;}
-  .crista p{margin-top:7px;font-size:clamp(13.5px,2.4vw,15px);line-height:1.55;color:rgba(255,255,255,.84);
-    max-width:52ch;}
+  /* ── a declaracao ── */
+  .preambulo{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--mudo);}
 
-  /* ── conteudo do certificado ── */
-  .miolo{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:clamp(24px,4vw,44px);
-    padding:clamp(26px,5vw,40px) clamp(22px,5vw,40px) clamp(28px,5vw,40px);align-items:start;}
+  .nome{margin-top:clamp(10px,1.6vw,14px);font-size:clamp(30px,5.6vw,46px);line-height:1.08;
+    font-weight:300;letter-spacing:-.025em;color:var(--tinta);text-wrap:balance;}
 
-  dl.ficha{min-width:0;}
-  .linha{padding:15px 0;border-bottom:1px solid var(--cinza-borda);}
-  .linha:first-child{padding-top:0;}
-  .linha:last-child{border-bottom:0;padding-bottom:0;}
-  .linha dt{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--mudo);}
-  .linha dd{margin-top:5px;font-size:clamp(16px,2.6vw,18px);font-weight:700;color:var(--tinta);
-    word-break:break-word;}
-  .linha dd.codigo{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:16px;letter-spacing:.05em;color:var(--azul-fundo);}
+  .fio{width:56px;height:2px;margin:clamp(18px,2.6vw,24px) 0;border-radius:2px;
+    background:linear-gradient(90deg,var(--azul),var(--azul-ceu));}
 
-  .selo-ok{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;
-    font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
-    background:rgba(14,159,110,.1);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(14,159,110,.28);}
-  .selo-ok i{width:7px;height:7px;border-radius:50%;background:var(--ok);}
+  .declara{font-size:clamp(15px,2.5vw,17px);line-height:1.68;color:#4A5064;max-width:46ch;}
+  .declara strong{font-weight:800;color:var(--tinta);}
 
-  /* ── a placa ── */
-  .lado{text-align:center;}
-  .quadro{position:relative;padding:10px;border-radius:12px;
-    background:linear-gradient(160deg,#24242C 0%,#121219 48%,#0A0A10 100%);
-    box-shadow:0 20px 44px -20px rgba(16,24,40,.5), inset 0 1px 0 rgba(255,255,255,.08);}
-  .quadro img{display:block;width:100%;height:auto;border-radius:4px;}
-  /* brilho que atravessa a placa quando o certificado e validado */
+  /* ── o premio, ao lado ── */
+  .premio{text-align:center;}
+  .quadro{position:relative;padding:11px;border-radius:14px;
+    background:linear-gradient(160deg,#272730 0%,#131319 48%,#0A0A10 100%);
+    box-shadow:0 26px 52px -22px rgba(10,16,40,.58),
+               0 0 0 1px rgba(255,255,255,.05) inset,
+               inset 0 1px 0 rgba(255,255,255,.1);}
+  .quadro img{display:block;width:100%;height:auto;border-radius:5px;}
   .quadro::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-    background:linear-gradient(104deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.3) 50%,rgba(255,255,255,0) 62%);
+    background:linear-gradient(104deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.32) 50%,rgba(255,255,255,0) 62%);
     transform:translateX(-130%);}
-  body[data-estado="valido"] .quadro::after{animation:varre 1.15s .55s ease-out;}
+  body[data-estado="valido"] .quadro::after{animation:varre 1.2s .6s ease-out;}
   @keyframes varre{to{transform:translateX(130%)}}
-  .lado .legenda{margin-top:12px;font-size:12px;font-weight:700;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--mudo);}
+  .premio .titulo{margin-top:14px;font-size:13px;font-weight:800;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--azul-fundo);}
+  .premio .marco{margin-top:3px;font-size:12.5px;color:var(--mudo);}
 
-  /* ── rodape do cartao ── */
-  .nota{padding:17px clamp(22px,5vw,40px);border-top:1px solid var(--cinza-borda);
-    background:var(--azul-leve);font-size:13px;line-height:1.6;color:#4A5570;}
+  /* ── linha de registro, como rodape de documento ── */
+  .registro{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;
+    gap:clamp(14px,3vw,30px);margin:0 clamp(16px,2.6vw,22px) clamp(16px,2.6vw,22px);
+    padding:16px clamp(14px,3vw,24px);border-radius:14px;background:#F6F8FD;
+    border:1px solid var(--cinza-borda);}
+  .registro div{min-width:0;}
+  .registro dt{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    color:#6B7280;}
+  .registro dd{margin-top:3px;font-size:14px;font-weight:700;color:var(--tinta);}
+  .registro dd.codigo{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:14px;letter-spacing:.04em;color:var(--azul-fundo);}
+  .registro .empurra{margin-left:auto;}
+  .selo-ok{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;
+    font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    background:rgba(14,159,110,.1);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(14,159,110,.3);}
+  .selo-ok i{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+
+  .nota{margin-top:var(--s-3);text-align:center;font-size:12.5px;line-height:1.6;color:#6B7280;}
 
   .refazer{display:block;margin:var(--s-4) auto 0;min-height:48px;padding:13px 28px;
     border:1px solid var(--cinza-borda);border-radius:999px;background:var(--branco);
@@ -206,8 +227,10 @@
   }
 
   @media (max-width:760px){
-    .miolo{grid-template-columns:1fr;gap:var(--s-3);}
-    .lado{max-width:220px;margin:0 auto;}
+    .conteudo{grid-template-columns:1fr;gap:var(--s-4);}
+    .premio{max-width:220px;margin:0 auto;order:-1;}
+    .registro{flex-direction:column;align-items:flex-start;gap:14px;}
+    .registro .empurra{margin-left:0;}
   }
   @media (max-width:560px){
     .barra .etiqueta span{display:none;}
@@ -230,42 +253,49 @@
 
 <main class="faixa">
   <div id="palco">
-    <article class="certificado" id="certificado">
+    <article class="documento" id="certificado">
+      <div class="moldura">
+        <div class="conteudo">
 
-      <div class="crista">
-        <div class="linha">
-          <span class="visto" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="m4 12 5.5 5.5L20 7"/></svg>
-          </span>
-          <div>
-            <h1 id="titulo">Certificado autêntico</h1>
-            <p id="explica">Este certificado foi emitido pela Tutory e corresponde a uma conquista registrada na plataforma.</p>
+          <div class="texto">
+            <span class="selo">
+              <span class="disco" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="m4 12 5.5 5.5L20 7"/></svg>
+              </span>
+              <b id="titulo">Certificado autêntico</b>
+            </span>
+
+            <p class="preambulo">A Tutory certifica que</p>
+            <h1 class="nome" id="d-mentor">—</h1>
+            <div class="fio" aria-hidden="true"></div>
+            <p class="declara" id="declara">
+              conquistou a <strong>Placa Ouro</strong> do Programa de Reconhecimento
+              Tutory Mentoria, ao alcançar <strong>100 alunos</strong> na
+              <strong id="d-mentoria">—</strong>.
+            </p>
           </div>
+
+          <div class="premio">
+            <div class="quadro">
+              <img src="assets/placa-ouro.jpg" alt="Placa Ouro da Mentoria Tutory" width="580" height="820">
+            </div>
+            <p class="titulo" id="d-conquista">Placa Ouro</p>
+            <p class="marco" id="d-alunos">100 alunos</p>
+          </div>
+
         </div>
       </div>
 
-      <div class="miolo">
-        <dl class="ficha">
-          <div class="linha"><dt>Mentor(a)</dt><dd id="d-mentor">—</dd></div>
-          <div class="linha"><dt>Mentoria</dt><dd id="d-mentoria">—</dd></div>
-          <div class="linha"><dt>Conquista</dt><dd id="d-conquista">—</dd></div>
-          <div class="linha"><dt>Data da conquista</dt><dd id="d-data">—</dd></div>
-          <div class="linha"><dt>Código</dt><dd class="codigo" id="d-codigo">—</dd></div>
-          <div class="linha"><dt>Status</dt>
-            <dd><span class="selo-ok"><i aria-hidden="true"></i>Válido</span></dd></div>
-        </dl>
-
-        <div class="lado">
-          <div class="quadro">
-            <img src="assets/placa-ouro.jpg" alt="Placa Ouro da Mentoria Tutory" width="580" height="820">
-          </div>
-          <p class="legenda">Placa Ouro</p>
-        </div>
-      </div>
-
-      <p class="nota">A conferência considera os registros da plataforma no momento da consulta.
-        Em caso de dúvida sobre um certificado, fale com a Tutory.</p>
+      <dl class="registro">
+        <div><dt>Data da conquista</dt><dd id="d-data">—</dd></div>
+        <div><dt>Código de verificação</dt><dd class="codigo" id="d-codigo">—</dd></div>
+        <div class="empurra"><dt>Status</dt>
+          <dd><span class="selo-ok"><i aria-hidden="true"></i>Válido</span></dd></div>
+      </dl>
     </article>
+
+    <p class="nota">A conferência considera os registros da plataforma no momento da consulta.
+      Em caso de dúvida sobre um certificado, fale com a Tutory.</p>
 
     <button class="refazer" id="refazer" type="button">Verificar outro código</button>
   </div>
@@ -360,13 +390,24 @@
   }
 
   function preencher(d) {
-    document.getElementById('d-mentor').textContent    = d.mentor || '—';
-    document.getElementById('d-mentoria').textContent  = d.mentoria || '—';
-    document.getElementById('d-conquista').textContent =
-      (d.conquista || '') + (d.alunos ? ' · ' + d.alunos : '');
-    document.getElementById('d-data').textContent      = d.data || '—';
-    document.getElementById('d-codigo').textContent    = d.codigo || '—';
+    document.getElementById('d-mentor').textContent   = d.mentor || '—';
+    document.getElementById('d-mentoria').textContent = d.mentoria || '—';
+    document.getElementById('d-conquista').textContent = d.conquista || 'Placa Ouro';
+    document.getElementById('d-alunos').textContent   = d.alunos || '';
+    document.getElementById('d-data').textContent     = d.data || '—';
+    document.getElementById('d-codigo').textContent   = d.codigo || '—';
+    /* a declaração é montada com os dados reais, não com texto fixo */
+    var dec = document.getElementById('declara');
+    dec.innerHTML = 'conquistou a <strong>' + esc(d.conquista || 'Placa Ouro') +
+      '</strong> do Programa de Reconhecimento Tutory Mentoria' +
+      (d.alunos ? ', ao alcançar <strong>' + esc(d.alunos) + '</strong>' : '') +
+      ' na <strong>' + esc(d.mentoria || '') + '</strong>.';
     document.title = 'Certificado ' + (d.codigo || '') + ' · Tutory';
+  }
+
+  function esc(t) {
+    return String(t == null ? '' : t)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function mostrarErro(titulo, texto) {
