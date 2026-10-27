@@ -15,14 +15,14 @@
       <!-- o ruido vive em torno de 0,5; esticar a faixa e o que cria
            nucleo denso e vazio, em vez de um veu cinza uniforme -->
       <feComponentTransfer in="a" result="a2">
-        <feFuncA type="linear" slope="3.6" intercept="-1.62"/>
+        <feFuncA type="linear" slope="3.0" intercept="-1.34"/>
       </feComponentTransfer>
       <feComponentTransfer in="a2" result="a3">
         <feFuncA type="gamma" exponent="0.78" amplitude="1"/>
       </feComponentTransfer>
       <feFlood flood-color="#FAFBFE" result="w"/>
       <feComposite in="w" in2="a3" operator="in" result="s"/>
-      <feGaussianBlur in="s" stdDeviation="2.6"/>
+      <feGaussianBlur in="s" stdDeviation="0.6"/>
     </filter>
   </defs>
   <g mask="url(#m)"><rect width="820" height="305" filter="url(#f)"/></g>

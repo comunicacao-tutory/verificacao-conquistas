@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8">
+<style>
+  html,body{margin:0;background:transparent}
+  /* janela que recorta exatamente o ladrilho do meio */
+  .janela{width:820px;height:305px;overflow:hidden;position:relative}
+  /* tres copias lado a lado: o desfoque passa a ter vizinho de verdade
+     nas duas bordas, entao o ladrilho recortado continua casando */
+  .faixa{position:absolute;left:-820px;top:0;width:2460px;height:305px;
+         background:url('tile-cru.png') repeat-x left top/820px 305px;
+         filter:blur(2.4px)}
+</style>
+<div class="janela"><div class="faixa"></div></div>

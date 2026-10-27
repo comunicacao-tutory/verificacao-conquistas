@@ -25,6 +25,7 @@
     --fundo:#F9FAFD; --branco:#FFFFFF; --tinta:#242424; --mudo:#6B6B6B;
     --cinza-borda:#E6E9F2; --carvao:#0A0A10;
     --ouro:#C9A05A; --ok:#0E9F6E;
+    --ok-texto:#07704A; /* o verde claro nao alcanca 4,5:1 em corpo pequeno */
     --s-1:8px; --s-2:16px; --s-3:24px; --s-4:40px; --s-5:64px; --s-6:96px;
     --topo:56px; /* altura da barra: 55px + 1px de borda */
     --t:260ms cubic-bezier(.4,0,.2,1);
@@ -81,6 +82,12 @@
       radial-gradient(128% 96% at 50% 46%, transparent 24%, rgba(0,0,0,.74) 78%, #000 100%),
       linear-gradient(180deg,#0C0A08 0%,#070608 58%,#030303 100%);}
 
+  /* o pe do palco escurece: sem isso a fumaça clara era cortada a seco
+     na borda e o degrade abaixo começava num preto que nao existia ali */
+  .palco::after{content:"";position:absolute;z-index:5;left:0;right:0;bottom:0;
+    height:clamp(90px,13vh,160px);pointer-events:none;
+    background:linear-gradient(180deg,rgba(4,4,6,0) 0%,rgba(4,4,6,.72) 54%,#040406 100%);}
+
   /* feixe do refletor.
      O recorte e o desfoque ficam em elementos diferentes porque
      clip-path é aplicado DEPOIS do filter: no mesmo elemento ele
@@ -125,11 +132,18 @@
             mask-image:linear-gradient(to top,#000 38%,rgba(0,0,0,.55) 72%,transparent 100%);}
   /* o passo da animação vale 100vw, então só ladrilhos que cabem
      nele um número inteiro de vezes fecham o laço sem emenda */
-  .fumaca.fundo{z-index:1;height:min(46vh,400px);--op:.5;background-size:25% auto;
+  .fumaca.fundo{z-index:1;height:min(46vh,400px);--op:.5;
+    background-size:50% auto;background-position:bottom left;
     animation:arrasta 86s linear infinite,
               respira 21s ease-in-out infinite,
               surge 4s ease-out .3s backwards;}
-  .fumaca.frente{z-index:3;height:min(26vh,215px);--op:.34;background-size:50% auto;
+  /* Limite proposital: .vitrine mora dentro de .cena (z-index 2), entao
+     o quadro pinta abaixo desta camada. Mantendo a fumaça da frente mais
+     baixa que o pe do quadro, ela nunca o encobre, nem em tela estreita
+     e alta, e ainda passa na frente do podio. */
+  .fumaca.frente{z-index:3;height:min(20vh,190px);--op:.34;
+    /* fase deslocada pra nao sobrepor o mesmo desenho da camada de tras */
+    background-size:50% auto;background-position:bottom 0 left 37%;
     animation:arrasta 52s linear infinite reverse,
               respira 14s ease-in-out -5s infinite,
               surge 4s ease-out 1.1s backwards;}
@@ -174,7 +188,7 @@
     background:radial-gradient(ellipse,rgba(0,0,0,.75),rgba(0,0,0,0) 72%);filter:blur(5px);}
 
   /* convite para descer */
-  .descer{position:absolute;left:50%;bottom:26px;z-index:5;transform:translateX(-50%);
+  .descer{position:absolute;left:50%;bottom:26px;z-index:6;transform:translateX(-50%);
     display:flex;flex-direction:column;align-items:center;gap:8px;
     font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
     color:rgba(240,237,230,.92);opacity:0;transition:opacity .7s ease 2.4s;
@@ -192,10 +206,12 @@
   /* degradê que leva do palco para os dados */
   /* o palco ja termina escuro, entao a transicao sobe devagar
      ate o claro, sem faixa dura no meio */
-  .transicao{height:clamp(110px,16vh,190px);
-    background:linear-gradient(180deg,
-      #05050A 0%, #0B0C14 22%, #1E212E 44%, #4A5168 64%,
-      #9AA2B8 80%, #DDE2EE 92%, var(--fundo) 100%);}
+  .transicao{height:clamp(170px,24vh,280px);
+    /* oklab interpola pelo brilho percebido: o mesmo degrade em sRGB
+       afundava no meio e deixava faixa visivel */
+    background:linear-gradient(180deg in oklab,
+      #040406 0%, #0B0D14 16%, #1B1F2B 34%, #353B4D 50%,
+      #5C6479 64%, #8C94A8 76%, #BCC3D2 87%, #E4E8F0 95%, var(--fundo) 100%);}
 
   /* ── o documento ──────────────────────────────────────
      Tratado como certificado, nao como ficha de dados: o nome
@@ -280,7 +296,7 @@
     font-size:14px;letter-spacing:.04em;color:var(--azul-fundo);}
   .selo-ok{display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:999px;
     font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
-    background:rgba(14,159,110,.1);color:var(--ok);box-shadow:inset 0 0 0 1px rgba(14,159,110,.3);}
+    background:rgba(14,159,110,.12);color:var(--ok-texto);box-shadow:inset 0 0 0 1px rgba(14,159,110,.34);}
   .selo-ok i{width:6px;height:6px;border-radius:50%;background:var(--ok);}
 
   .nota{margin-top:clamp(12px,1.8vh,20px);text-align:center;font-size:12.5px;line-height:1.6;color:#6B7280;}
@@ -369,8 +385,36 @@
   a:focus-visible,button:focus-visible,input:focus-visible{
     outline:2px solid var(--azul);outline-offset:3px;}
 
+  /* impressao: o certificado e o que importa no papel; palco,
+     degrade e botoes so gastariam tinta. */
+  @media print{
+    .palco,.transicao,.cortina,.descer,.refazer,.barra,.redes{display:none!important;}
+    /* 100vh vira a altura da pagina na impressao e empurrava o
+       certificado inteiro para a folha 2 */
+    html,body{background:#fff!important;min-height:0!important;display:block!important;}
+    main{padding:0!important;display:block!important;}
+    .documento{max-width:none;margin:0;box-shadow:none;border:1px solid #CBD2E0;
+      border-radius:0;break-inside:avoid;}
+    /* 40px de respiro em cima e embaixo no rodape eram os 23px
+       que jogavam o certificado para a folha 2 */
+    footer{border-top:1px solid #CBD2E0;break-inside:avoid;padding:16px 0!important;}
+    @page{margin:14mm;}
+  }
+
+  /* Movimento reduzido. Encurtar a duracao nao basta: o quadro e o
+     convite nascem invisiveis e so apareciam pela animacao, entao
+     ficavam para sempre em opacity:0 se ela nao concluisse. Aqui o
+     estado final e escrito a mao, sem depender de animacao nenhuma. */
   @media (prefers-reduced-motion:reduce){
-    *{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+    *{animation-duration:.01ms!important;animation-delay:0s!important;
+      animation-iteration-count:1!important;
+      transition-duration:.01ms!important;transition-delay:0s!important;}
+    body[data-estado="valido"] .vitrine,
+    body[data-estado="valido"] .vitrine .flutua{
+      animation:none!important;opacity:1;translate:0 0;scale:1;filter:none;}
+    body[data-estado="valido"] .descer{animation:none!important;transition:none!important;opacity:1;}
+    .fumaca{animation:none!important;}
+    .feixe{animation:none!important;}
   }
 
   /* ── tela baixa: o certificado se reorganiza para caber inteiro ──
@@ -603,11 +647,13 @@
     eTexto.textContent = texto;
     erro.setAttribute('visivel', '');
     campo.setAttribute('aria-invalid', 'true');
+    campo.setAttribute('aria-describedby', 'erro-titulo erro-texto dica');
     campo.focus();
   }
   function limpar() {
     erro.removeAttribute('visivel');
     campo.removeAttribute('aria-invalid');
+    campo.setAttribute('aria-describedby', 'dica');
   }
   campo.addEventListener('input', limpar);
 
@@ -633,13 +679,18 @@
     var t0 = Date.now();
 
     caminhoDo(codigo).then(function (c) {
+      /* 404 é código inexistente; qualquer outra falha é da consulta.
+         Tratar os dois como "não encontrado" dizia a quem está sem rede
+         que o certificado dele é falso. */
       return fetch(c, { cache: 'no-store' }).then(function (r) {
-        if (!r.ok) throw new Error('nao encontrado');
-        return r.json();
-      });
+        if (r.status === 404) throw new Error('nao-encontrado');
+        if (!r.ok) throw new Error('falha-consulta');
+        return r.json().catch(function () { throw new Error('falha-consulta'); });
+      }, function () { throw new Error('falha-consulta'); });
     }).then(function (d) {
       return esperar(t0).then(function () {
         preencher(d);
+        fundoInerte(false);
         corpo.setAttribute('data-estado', 'valido');
         window.scrollTo({ top: 0, behavior: 'auto' });
         /* o quadro materializa no palco; quem quiser os dados desce */
@@ -653,9 +704,13 @@
       });
     }).catch(function (e) {
       return esperar(t0).then(function () {
-        if (e && e.message === 'sem-crypto') {
+        var m = e && e.message;
+        if (m === 'sem-crypto') {
           mostrarErro('Não foi possível verificar',
             'Abra esta página por um endereço seguro, começando com https.');
+        } else if (m === 'falha-consulta') {
+          mostrarErro('Não conseguimos consultar agora',
+            'Verifique sua conexão e tente de novo em instantes. O código pode estar correto.');
         } else {
           mostrarErro('Código não encontrado',
             'Não encontramos nenhum certificado com este código. Confira se ele foi digitado corretamente.');
@@ -669,7 +724,20 @@
     });
   });
 
+  /* Sem isto o Tab sai do pop-up e alcança os botões atrás dele:
+     pointer-events:none barra o mouse, nao o teclado. */
+  var fundo = ['.palco', '.transicao', '#dados', 'footer']
+    .map(function (q) { return document.querySelector(q); })
+    .filter(Boolean);
+  function fundoInerte(ligado) {
+    fundo.forEach(function (el) {
+      if (ligado) el.setAttribute('inert', '');
+      else el.removeAttribute('inert');
+    });
+  }
+
   refazer.addEventListener('click', function () {
+    fundoInerte(true);
     corpo.setAttribute('data-estado', 'consultando');
     document.title = 'Verificação de Conquistas · Tutory';
     campo.value = '';
@@ -685,6 +753,7 @@
 
   function abrirConsulta() {
     if (corpo.getAttribute('data-estado') === 'valido') return;
+    fundoInerte(true);
     corpo.setAttribute('data-estado', 'consultando');
     setTimeout(function () { campo.focus(); }, 420);
   }
